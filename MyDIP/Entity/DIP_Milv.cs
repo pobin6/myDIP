@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Entity
 {
+    /// <summary>
+    /// 幂律算法
+    /// </summary>
     public class DIP_Milv : EntityBase
     {
         [DescriptionAttribute("设置灰度值中R的比例 范围0-1")]
@@ -21,6 +24,8 @@ namespace Entity
 
         DIP_Milv()
         {
+            c = 1;
+            gamma = 0.6;
             valueChange += valueChangeEvent;
         }
 

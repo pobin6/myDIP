@@ -30,6 +30,7 @@
         {
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.button1 = new System.Windows.Forms.Button();
+            this.btnSave = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // propertyGrid1
@@ -50,11 +51,22 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(579, 534);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(75, 23);
+            this.btnSave.TabIndex = 2;
+            this.btnSave.Text = "保存";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
             // FormSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 569);
+            this.Controls.Add(this.btnSave);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.propertyGrid1);
             this.Name = "FormSet";
@@ -68,5 +80,6 @@
 
         private System.Windows.Forms.PropertyGrid propertyGrid1;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnSave;
     }
 }

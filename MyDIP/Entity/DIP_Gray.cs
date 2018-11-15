@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Entity
 {
+    /// <summary>
+    /// 图片灰度化算法
+    /// </summary>
     public class DIP_Gray:EntityBase
     {
         private double _R;
@@ -38,6 +41,9 @@ namespace Entity
 
         DIP_Gray()
         {
+            R = 1;
+            G = 1;
+            B = 1;
             valueChange += valueChangeEvent;
         }
 
@@ -70,7 +76,7 @@ namespace Entity
                 {
                     var color = bitmapResult.GetPixel(i, j);
                     int gray = (int)(color.R * r + color.G * g + color.B * b);
-                    bitmapResult.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
+                    bitmapResult.SetPixel(i, j, Color.FromArgb(gray));
                 }
             }
         }

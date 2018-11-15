@@ -34,5 +34,10 @@ namespace MyDIP
         {
             entity.valueChange();
         }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            entity.bitmapResult.Save(@"C:\Projects\myDIP\20181112\test.bmp");
+        }
     }
 }
