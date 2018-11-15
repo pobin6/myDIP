@@ -67,26 +67,58 @@ namespace Entity
         private void HE(int w,int h,int we,int he)
         {
             // 计算直方图
-            Dictionary<int, double> pixSameNum = new Dictionary<int, double>();
+            Dictionary<int, double> pixSameNumR = new Dictionary<int, double>();
+            Dictionary<int, double> pixSameNumG = new Dictionary<int, double>();
+            Dictionary<int, double> pixSameNumB = new Dictionary<int, double>();
             for (int i = w; i < we; i++)
             {
                 for (int j = h; j < he; j++)
                 {
                     var color = bitmapResult.GetPixel(i, j);
-                    int r = (color.R + color.G + color.B) / 3;
-                    if (pixSameNum.Keys.Contains(r))
+                    if (pixSameNumR.Keys.Contains(color.R))
                     {
-                        pixSameNum[r]++;
+                        pixSameNumR[color.R]++;
                     }
                     else
                     {
-                        pixSameNum.Add(r, 1);
+                        pixSameNumR.Add(color.R, 1);
+                    }
+                    if (pixSameNumG.Keys.Contains(color.G))
+                    {
+                        pixSameNumG[color.G]++;
+                    }
+                    else
+                    {
+                        pixSameNumG.Add(color.G, 1);
+                    }
+                    if (pixSameNumB.Keys.Contains(color.B))
+                    {
+                        pixSameNumB[color.B]++;
+                    }
+                    else
+                    {
+                        pixSameNumB.Add(color.B, 1);
                     }
                 }
             }
             // 计算均衡直方图
-            double p = 0;
             double pixAll = bitmapResult.Width * bitmapResult.Height;
+            int[] LR = HEPart(pixAll,pixSameNumR);
+            int[] LG = HEPart(pixAll,pixSameNumG);
+            int[] LB = HEPart(pixAll,pixSameNumB);
+            // 应用均衡直方图
+            for (int i = w; i < we; i++)
+            {
+                for (int j = h; j < he; j++)
+                {
+                    var color = bitmapResult.GetPixel(i, j);
+                    bitmapResult.SetPixel(i, j, Color.FromArgb(LR[color.R], LG[color.G], LB[color.B]));
+                }
+            }
+        }
+        private int[] HEPart(double pixAll, Dictionary<int, double> pixSameNum)
+        {
+            double p = 0;
             double s0 = 0, s1 = 0;
             int[] L = new int[256];
             Array.Clear(L, 0, 256);
@@ -97,16 +129,7 @@ namespace Entity
                 L[255 - pixSameNum.Keys.ElementAt(i)] = (int)(s1 * 255);
                 s0 = s1;
             }
-            // 应用均衡直方图
-            for (int i = w; i < we; i++)
-            {
-                for (int j = h; j < he; j++)
-                {
-                    var color = bitmapResult.GetPixel(i, j);
-                    int r = (color.R + color.G + color.B) / 3;
-                    bitmapResult.SetPixel(i, j, Color.FromArgb(L[r], L[r], L[r]));
-                }
-            }
+            return L;
         }
     }
 }
