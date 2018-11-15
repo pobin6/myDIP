@@ -52,9 +52,13 @@ namespace Entity
                 for (int j = 0; j < y; j++)
                 {
                     var color = bitmapResult.GetPixel(i, j);
-                    double r = (double)(color.R + color.G + color.B) / 3 / 255;
-                    int s = (int)(c * Math.Pow(r , gamma) * 255);
-                    bitmapResult.SetPixel(i, j, Color.FromArgb(s, s, s));
+                    double r = (double)(color.R) / 255;
+                    double g = (double)(color.G) / 255;
+                    double b = (double)(color.B) / 255;
+                    int sR = (int)(c * Math.Pow(r, gamma) * 255);
+                    int sG = (int)(c * Math.Pow(g, gamma) * 255);
+                    int sB = (int)(c * Math.Pow(b, gamma) * 255);
+                    bitmapResult.SetPixel(i, j, Color.FromArgb(sR, sG, sB));
                 }
             }
         }

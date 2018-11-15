@@ -13,25 +13,50 @@ namespace Entity
     /// </summary>
     public class DIP_SF : EntityBase
     {
-        [DescriptionAttribute("滤波模板第一行值")]
-        public int[] r1 { get; set; }
-        [DescriptionAttribute("滤波模板第二行值")]
-        public int[] r2 { get; set; }
-        [DescriptionAttribute("滤波模板第三行值")]
-        public int[] r3 { get; set; }
+        public enum Filter_TYPE
+        {
+            Mean_Value_Filter,
+            Middle_Value_Filter
+        }
 
+        [DescriptionAttribute("滤波模板")]
+        public int[][] Model { get; set; }
+
+        public Filter_TYPE filter;
+        [DescriptionAttribute("滤波模板第三行值")]
+        public Filter_TYPE Filter
+        {
+            get { return filter;}
+            set
+            {
+                switch(value)
+                {
+                    case Filter_TYPE.Mean_Value_Filter:
+                        valueFilterChange = null;
+                        valueFilterChange += valueChangeMeanEvent;
+                        break;
+                    case Filter_TYPE.Middle_Value_Filter:
+                        valueFilterChange = null; 
+                         valueFilterChange += valueChangeMiddleEvent;
+                        break;
+                }
+                filter = value;
+            }
+        }
+        public ValueChange valueFilterChange = null;
         private static DIP_SF _instance = null;
         private static readonly object _locker = new object();
         private static readonly object _locker2 = new object();
 
+
         DIP_SF()
         {
-            r1 = new int[] { 5, 5, 5 };
-            r2 = new int[] { 1, 1, 1 };
-            r3 = new int[] { 5, 5, 5 };
+            Model = new int[][] { new int[3]{ 1, 1, 1 }, new int[3]{ 1, 1, 1 }, new int[3]{ 1, 1, 1 } };
             valueChange += valueChangeEvent;
+            filter = Filter_TYPE.Mean_Value_Filter;
+            valueFilterChange += valueChangeMeanEvent;
         }
-
+        
         public static DIP_SF getInstance()
         {
             if (_instance == null)
@@ -47,39 +72,113 @@ namespace Entity
 
         private void valueChangeEvent()
         {
+            valueFilterChange();
+        }
+        private void valueChangeMeanEvent()
+        {
             bitmapResult = bitmap.Clone() as Bitmap;
             int x = bitmap.Width;
             int y = bitmap.Height;
-            int sum = r1[0] + r1[1] + r1[2] + r2[0] + r2[1] + r2[2] + r3[0] + r3[1] + r3[2];
-            for (int i = 1; i < x-1; i++)
+            int sum = 0;
+            foreach (var item in Model)
             {
-                for (int j = 1; j < y-1; j++)
+                foreach (var it in item)
                 {
-                    int[,] r = new int[3, 3];
-                    r[0, 0] = Gray(bitmapResult.GetPixel(i - 1, j - 1));
-                    r[0, 1] = Gray(bitmapResult.GetPixel(i - 1, j ));
-                    r[0, 2] = Gray(bitmapResult.GetPixel(i - 1, j + 1));
-                    r[1, 0] = Gray(bitmapResult.GetPixel(i, j - 1));
-                    r[1, 1] = Gray(bitmapResult.GetPixel(i, j));
-                    r[1, 2] = Gray(bitmapResult.GetPixel(i, j + 1));
-                    r[2, 0] = Gray(bitmapResult.GetPixel(i + 1, j - 1));
-                    r[2, 1] = Gray(bitmapResult.GetPixel(i + 1, j));
-                    r[2, 2] = Gray(bitmapResult.GetPixel(i + 1, j + 1));
-                    int sumR = 0;
-                    for (int w = 0; w < 3; w++)
+                    sum += it;
+                }
+            }
+            int start = Model.Length / 2;
+
+            for (int i = start; i < x - start; i++) 
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    int sumR = 0, sumG = 0, sumB = 0;
+                    for (int w = 0; w < Model.Length; w++)
                     {
-                        for (int h = 0; h < 3; h++)
+                        for (int h = 0; h < Model.Length; h++)
                         {
-                            sumR += r[w, h];
+                            sumR += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) * Model[w][h];
+                            sumG += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) * Model[w][h];
+                            sumB += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2) * Model[w][h];
                         }
                     }
-                    int s = sumR / sum;
-                    bitmapResult.SetPixel(i, j, Color.FromArgb(s, s, s));
+                    bitmapResult.SetPixel(i, j, Color.FromArgb(sumR / sum, sumG / sum, sumB / sum));
+                }
+            }
+
+        }
+
+        private void valueChangeMiddleEvent()
+        {
+            bitmapResult = bitmap.Clone() as Bitmap;
+            int x = bitmap.Width;
+            int y = bitmap.Height;
+            int start = Model.Length / 2;
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    int[,] PixR = new int[Model.Length, Model.Length];
+                    int[,] PixG = new int[Model.Length, Model.Length];
+                    int[,] PixB = new int[Model.Length, Model.Length];
+                    for (int w = 0; w < Model.Length; w++)
+                    {
+                        for (int h = 0; h < Model.Length; h++)
+                        {
+                            PixR[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) * Model[w][h];
+                            PixG[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) * Model[w][h];
+                            PixB[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2) * Model[w][h];
+                        }
+                    }
+                    int middleR = PixR[0, 0], middleG = PixG[0, 0], middleB = PixB[0, 0];
+                    int x1 = 0, x2 = 0, x3 = 0, x4 = 0, x5 = 0, x6 = 0;
+                    for (int m = 0; m < (Model.Length * Model.Length)/2 + 1; m++)
+                    {
+                        middleR = 255;
+                        middleG = 255;
+                        middleB = 255;
+                        for (int n = 0; n < Model.Length; n++)
+                        {
+                            for (int l = 0; l < Model.Length; l++)
+                            {
+                                if (middleR > PixR[n,l])
+                                {
+                                    middleR = PixR[n,l];
+                                    x1 = n;
+                                    x2 = l;
+                                }
+                                if (middleG > PixG[n, l])
+                                {
+                                    middleG = PixG[n, l];
+                                    x3 = n;
+                                    x4 = l;
+                                }
+                                if (middleB > PixB[n, l])
+                                {
+                                    middleB = PixB[n, l];
+                                    x5 = n;
+                                    x6 = l;
+                                }
+                            }
+                        }
+                        PixR[x1, x2] = 255;
+                        PixG[x3, x4] = 255;
+                        PixB[x5, x6] = 255;
+                    }
+                    bitmapResult.SetPixel(i, j, Color.FromArgb(middleR, middleG, middleB));
                 }
             }
         }
-        private int Gray(Color color)
+
+        private int Gray(Color color,int i)
         {
+            switch(i)
+            {
+                case 0: return color.R;
+                case 1: return color.G;
+                case 2: return color.B;
+            }
             return (color.R + color.G + color.B) / 3;
         }
     }

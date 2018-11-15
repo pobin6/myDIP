@@ -27,7 +27,7 @@ namespace MyDIP
             {
                 string file = dialog.FileName;
                 bmpOrigin = new Bitmap(file);
-                pictureBox2.Image = bmpOrigin;
+                new FormPic(bmpOrigin).Show();
             }
         }
 
@@ -58,7 +58,7 @@ namespace MyDIP
         }
         private void ValueChange()
         {
-            pictureBox1.Image = entity.bitmapResult;
+            new FormPic(entity.bitmapResult).Show();
         }
 
         private void button1_Click(object sender, EventArgs e)
