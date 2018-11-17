@@ -44,9 +44,9 @@ namespace Entity
         {
             try
             {
-                bitmapResult = bitmap.Clone() as Bitmap;
-                int x = bitmap.Width/width;
-                int y = bitmap.Height/height;
+                bitmapResult = BitmapOrigin.Clone() as Bitmap;
+                int x = BitmapOrigin.Width/width;
+                int y = BitmapOrigin.Height/height;
                 int w=0, h=0;
                 for (w = 0; w < x; w++)
                 {
@@ -55,7 +55,7 @@ namespace Entity
                         HE(w * width, h * height, (w + 1) * width, (h + 1) * height);
                     }
                 }
-                HE((w + 1) * width, (h + 1) * height, bitmapResult.Width, bitmap.Height);
+                HE((w + 1) * width, (h + 1) * height, bitmapResult.Width, BitmapOrigin.Height);
             }
             catch
             {

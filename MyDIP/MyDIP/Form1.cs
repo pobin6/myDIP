@@ -41,7 +41,8 @@ namespace MyDIP
             DIP_Gray.getInstance().valueChange += ValueChange;
             DIP_Milv.getInstance().valueChange += ValueChange;
             DIP_HE.getInstance().valueChange += ValueChange;
-            DIP_SF.getInstance().valueChange += ValueChange;
+            DIP_SoftFilter.getInstance().valueChange += ValueChange;
+            DIP_ShapeFilter.getInstance().valueChange += ValueChange;
         }
 
         private void btnGray_Click(object sender, EventArgs e)
@@ -52,7 +53,7 @@ namespace MyDIP
                 return;
             }
             entity = DIP_Gray.getInstance();
-            DIP_Gray.getInstance().bitmap = bmpOrigin.Clone() as Bitmap;
+            DIP_Gray.getInstance().BitmapOrigin = bmpOrigin.Clone() as Bitmap;
             FormSet formSet = new FormSet(DIP_Gray.getInstance());
             formSet.Show();
         }
@@ -69,7 +70,7 @@ namespace MyDIP
                 return;
             }
             entity = DIP_Milv.getInstance();
-            DIP_Milv.getInstance().bitmap = bmpOrigin.Clone() as Bitmap;
+            DIP_Milv.getInstance().BitmapOrigin = bmpOrigin.Clone() as Bitmap;
             FormSet formSet = new FormSet(DIP_Milv.getInstance());
             formSet.Show();
         }
@@ -82,7 +83,7 @@ namespace MyDIP
                 return;
             }
             entity = DIP_HE.getInstance();
-            DIP_HE.getInstance().bitmap = bmpOrigin.Clone() as Bitmap;
+            DIP_HE.getInstance().BitmapOrigin = bmpOrigin.Clone() as Bitmap;
             DIP_HE.getInstance().width = bmpOrigin.Width;
             DIP_HE.getInstance().height = bmpOrigin.Height;
             FormSet formSet = new FormSet(DIP_HE.getInstance());
@@ -96,9 +97,22 @@ namespace MyDIP
                 MessageBox.Show("没有加载图片，请先打开一张图片");
                 return;
             }
-            entity = DIP_SF.getInstance();
-            DIP_SF.getInstance().bitmap = bmpOrigin.Clone() as Bitmap;
-            FormSet formSet = new FormSet(DIP_SF.getInstance());
+            entity = DIP_SoftFilter.getInstance();
+            DIP_SoftFilter.getInstance().BitmapOrigin = bmpOrigin.Clone() as Bitmap;
+            FormSet formSet = new FormSet(DIP_SoftFilter.getInstance());
+            formSet.Show();
+        }
+
+        private void btnSpF_Click(object sender, EventArgs e)
+        {
+            if (bmpOrigin == null)
+            {
+                MessageBox.Show("没有加载图片，请先打开一张图片");
+                return;
+            }
+            entity = DIP_ShapeFilter.getInstance();
+            DIP_ShapeFilter.getInstance().BitmapOrigin = bmpOrigin.Clone() as Bitmap;
+            FormSet formSet = new FormSet(DIP_ShapeFilter.getInstance());
             formSet.Show();
         }
     }

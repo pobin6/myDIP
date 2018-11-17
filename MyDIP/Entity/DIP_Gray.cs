@@ -62,14 +62,11 @@ namespace Entity
 
         private void valueChangeEvent()
         {
-            bitmapResult = bitmap.Clone() as Bitmap;
+            bitmapResult = BitmapOrigin.Clone() as Bitmap;
             double sum = _R + _G + _B;
             double r = _R / sum;
             double g = _G / sum;
             double b = _B / sum;
-
-            int x = bitmap.Width;
-            int y = bitmap.Height;
             for (int i = 0; i < x; i++)
             {
                 for (int j = 0; j < y; j++)

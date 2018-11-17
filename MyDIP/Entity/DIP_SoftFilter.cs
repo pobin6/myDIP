@@ -11,7 +11,7 @@ namespace Entity
     /// <summary>
     /// 平滑滤波算法
     /// </summary>
-    public class DIP_SF : EntityBase
+    public class DIP_SoftFilter : EntityBase
     {
         public enum Filter_TYPE
         {
@@ -44,12 +44,12 @@ namespace Entity
             }
         }
         public ValueChange valueFilterChange = null;
-        private static DIP_SF _instance = null;
+        private static DIP_SoftFilter _instance = null;
         private static readonly object _locker = new object();
         private static readonly object _locker2 = new object();
 
 
-        DIP_SF()
+        DIP_SoftFilter()
         {
             Model = new int[][] { new int[3]{ 1, 1, 1 }, new int[3]{ 1, 1, 1 }, new int[3]{ 1, 1, 1 } };
             valueChange += valueChangeEvent;
@@ -57,14 +57,14 @@ namespace Entity
             valueFilterChange += valueChangeMeanEvent;
         }
         
-        public static DIP_SF getInstance()
+        public static DIP_SoftFilter getInstance()
         {
             if (_instance == null)
             {
 
                 lock (_locker)
                 {
-                    _instance = new DIP_SF();
+                    _instance = new DIP_SoftFilter();
                 }
             }
             return _instance;
@@ -76,9 +76,7 @@ namespace Entity
         }
         private void valueChangeMeanEvent()
         {
-            bitmapResult = bitmap.Clone() as Bitmap;
-            int x = bitmap.Width;
-            int y = bitmap.Height;
+            bitmapResult = BitmapOrigin.Clone() as Bitmap;
             int sum = 0;
             foreach (var item in Model)
             {
@@ -111,9 +109,7 @@ namespace Entity
 
         private void valueChangeMiddleEvent()
         {
-            bitmapResult = bitmap.Clone() as Bitmap;
-            int x = bitmap.Width;
-            int y = bitmap.Height;
+            bitmapResult = BitmapOrigin.Clone() as Bitmap;
             int start = Model.Length / 2;
             for (int i = start; i < x - start; i++)
             {

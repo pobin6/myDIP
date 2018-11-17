@@ -55,7 +55,8 @@
     </EmbeddedResource>
     <Compile Include="DIP_Gray.cs" />
     <Compile Include="DIP_HE.cs" />
-    <Compile Include="DIP_SF.cs" />
+    <Compile Include="DIP_ShapeFilter.cs" />
+    <Compile Include="DIP_SoftFilter.cs" />
     <Compile Include="DIP_Milv.cs" />
     <Compile Include="EntityBase.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
