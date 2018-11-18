@@ -19,8 +19,8 @@ namespace Entity
             Middle_Value_Filter
         }
 
-        [DescriptionAttribute("滤波模板")]
-        public int[,] Model { get; set; }
+        //[DescriptionAttribute("滤波模板")]
+        private int[,] Model { get; set; }
         private int r = 3;
         public int Row
         {
@@ -41,7 +41,6 @@ namespace Entity
                 }
             }
         }
-        public int Col { get; set; }
         [DescriptionAttribute("平滑计算的RGB范围")]
         public int[][] RGB_Range { get; set; }
         public Filter_TYPE filter;

@@ -30,16 +30,16 @@
         {
             this.btnSF = new System.Windows.Forms.Button();
             this.btnHE = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnMiLv = new System.Windows.Forms.Button();
             this.btnGray = new System.Windows.Forms.Button();
-            this.btnOpen = new System.Windows.Forms.Button();
             this.btnSpF = new System.Windows.Forms.Button();
+            this.btnMath = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnSF
             // 
             this.btnSF.Location = new System.Drawing.Point(371, 146);
-            this.btnSF.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnSF.Margin = new System.Windows.Forms.Padding(4);
             this.btnSF.Name = "btnSF";
             this.btnSF.Size = new System.Drawing.Size(100, 29);
             this.btnSF.TabIndex = 9;
@@ -50,7 +50,7 @@
             // btnHE
             // 
             this.btnHE.Location = new System.Drawing.Point(371, 196);
-            this.btnHE.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnHE.Margin = new System.Windows.Forms.Padding(4);
             this.btnHE.Name = "btnHE";
             this.btnHE.Size = new System.Drawing.Size(100, 29);
             this.btnHE.TabIndex = 8;
@@ -58,38 +58,27 @@
             this.btnHE.UseVisualStyleBackColor = true;
             this.btnHE.Click += new System.EventHandler(this.btnHE_Click);
             // 
-            // button1
+            // btnMiLv
             // 
-            this.button1.Location = new System.Drawing.Point(371, 249);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(100, 29);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "幂律变换";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btnMiLv.Location = new System.Drawing.Point(371, 249);
+            this.btnMiLv.Margin = new System.Windows.Forms.Padding(4);
+            this.btnMiLv.Name = "btnMiLv";
+            this.btnMiLv.Size = new System.Drawing.Size(100, 29);
+            this.btnMiLv.TabIndex = 7;
+            this.btnMiLv.Text = "幂律变换";
+            this.btnMiLv.UseVisualStyleBackColor = true;
+            this.btnMiLv.Click += new System.EventHandler(this.button1_Click);
             // 
             // btnGray
             // 
-            this.btnGray.Location = new System.Drawing.Point(371, 312);
-            this.btnGray.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnGray.Location = new System.Drawing.Point(371, 301);
+            this.btnGray.Margin = new System.Windows.Forms.Padding(4);
             this.btnGray.Name = "btnGray";
             this.btnGray.Size = new System.Drawing.Size(100, 29);
             this.btnGray.TabIndex = 6;
             this.btnGray.Text = "灰度化";
             this.btnGray.UseVisualStyleBackColor = true;
             this.btnGray.Click += new System.EventHandler(this.btnGray_Click);
-            // 
-            // btnOpen
-            // 
-            this.btnOpen.Location = new System.Drawing.Point(371, 370);
-            this.btnOpen.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnOpen.Name = "btnOpen";
-            this.btnOpen.Size = new System.Drawing.Size(100, 29);
-            this.btnOpen.TabIndex = 5;
-            this.btnOpen.Text = "打开";
-            this.btnOpen.UseVisualStyleBackColor = true;
-            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
             // 
             // btnSpF
             // 
@@ -101,18 +90,29 @@
             this.btnSpF.UseVisualStyleBackColor = true;
             this.btnSpF.Click += new System.EventHandler(this.btnSpF_Click);
             // 
+            // btnMath
+            // 
+            this.btnMath.Location = new System.Drawing.Point(371, 350);
+            this.btnMath.Margin = new System.Windows.Forms.Padding(4);
+            this.btnMath.Name = "btnMath";
+            this.btnMath.Size = new System.Drawing.Size(100, 29);
+            this.btnMath.TabIndex = 11;
+            this.btnMath.Text = "基本运算";
+            this.btnMath.UseVisualStyleBackColor = true;
+            this.btnMath.Click += new System.EventHandler(this.btnMath_Click);
+            // 
             // DIPForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(969, 608);
+            this.Controls.Add(this.btnMath);
             this.Controls.Add(this.btnSpF);
             this.Controls.Add(this.btnSF);
             this.Controls.Add(this.btnHE);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnMiLv);
             this.Controls.Add(this.btnGray);
-            this.Controls.Add(this.btnOpen);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "DIPForm";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.DIPForm_Load);
@@ -124,10 +124,10 @@
 
         private System.Windows.Forms.Button btnSF;
         private System.Windows.Forms.Button btnHE;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnMiLv;
         private System.Windows.Forms.Button btnGray;
-        private System.Windows.Forms.Button btnOpen;
         private System.Windows.Forms.Button btnSpF;
+        private System.Windows.Forms.Button btnMath;
     }
 }
 

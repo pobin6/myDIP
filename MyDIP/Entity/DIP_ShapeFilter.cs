@@ -87,7 +87,7 @@ namespace Entity
 
         DIP_ShapeFilter()
         {
-            Model = new List<int[]> { new int[3]{ 0, 1, 0 }, new int[3]{ 1, -4, 1 }, new int[3]{ 0, 1, 0 } };
+            Model = new List<int[]> { new int[3]{ 1, 1, 1 }, new int[3]{ 1, -8, 1 }, new int[3]{ 1, 1, 1 } };
             valueChange += valueChangeEvent;
             filter = Filter_TYPE.Laplace_Filter;
             BD = Laplace_BD.Real_BD;
@@ -143,28 +143,6 @@ namespace Entity
             }
             // 标定
             color = BDFunc(color);
-            // 叠加原图
-            for (int i = start; i < x - start; i++)
-            {
-                for (int j = start; j < y - start; j++)
-                {
-                    Color pix = bitmapResult.GetPixel(i, j);
-                    color[0, i, j] = (int)(pix.R - color[0, i, j] * c);
-                    color[1, i, j] = (int)(pix.G - color[1, i, j] * c);
-                    color[2, i, j] = (int)(pix.B - color[2, i, j] * c);
-                }
-            }
-            for (int i = start; i < x - start; i++)
-            {
-                for (int j = start; j < y - start; j++)
-                {
-                    for (int c = 0; c < 3; c++)
-                    {
-                        color[c, i, j] = color[c, i, j] > 255 ? 255 : color[c, i, j];
-                        color[c, i, j] = color[c, i, j] < 0 ? 0 : color[c, i, j];
-                    }
-                }
-            }
             for (int i = start; i < x - start; i++)
             {
                 for (int j = start; j < y - start; j++)
@@ -175,6 +153,7 @@ namespace Entity
         }
         private void valueChangeUnsharp_MaskingEvent()
         {
+            //Model = new List<int[]> { new int[3] { 1, 1, 1 }, new int[3] { 1, 1, 1 }, new int[3] { 1, 1, 1 } };
             bitmapResult = BitmapOrigin.Clone() as Bitmap;
             int sum = 0;
             foreach (var item in Model)
@@ -271,27 +250,6 @@ namespace Entity
             }
             color = BDFunc(color);
             //叠加原图
-            for (int i = start; i < x - start; i++)
-            {
-                for (int j = start; j < y - start; j++)
-                {
-                    Color pix = bitmapResult.GetPixel(i, j);
-                    color[0, i, j] = (int)(pix.R - color[0, i, j] * c);
-                    color[1, i, j] = (int)(pix.G - color[1, i, j] * c);
-                    color[2, i, j] = (int)(pix.B - color[2, i, j] * c);
-                }
-            }
-            for (int i = start; i < x - start; i++)
-            {
-                for (int j = start; j < y - start; j++)
-                {
-                    for (int c = 0; c < 3; c++)
-                    {
-                        color[c, i, j] = color[c, i, j] > 255 ? 255 : color[c, i, j];
-                        color[c, i, j] = color[c, i, j] < 0 ? 0 : color[c, i, j];
-                    }
-                }
-            }
             for (int i = start; i < x - start; i++)
             {
                 for (int j = start; j < y - start; j++)
