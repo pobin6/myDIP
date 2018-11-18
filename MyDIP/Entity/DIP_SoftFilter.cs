@@ -20,10 +20,32 @@ namespace Entity
         }
 
         [DescriptionAttribute("滤波模板")]
-        public int[][] Model { get; set; }
-
+        public int[,] Model { get; set; }
+        private int r = 3;
+        public int Row
+        {
+            get
+            {
+                return r;
+            }
+            set
+            {
+                r = value;
+                Model = new int[r, r];
+                for (int i = 0; i < r; i++)
+                {
+                    for (int j = 0; j < r; j++)
+                    {
+                        Model[i, j] = 1;
+                    }
+                }
+            }
+        }
+        public int Col { get; set; }
+        [DescriptionAttribute("平滑计算的RGB范围")]
+        public int[][] RGB_Range { get; set; }
         public Filter_TYPE filter;
-        [DescriptionAttribute("滤波模板第三行值")]
+        [DescriptionAttribute("滤波器选择")]
         public Filter_TYPE Filter
         {
             get { return filter;}
@@ -51,7 +73,8 @@ namespace Entity
 
         DIP_SoftFilter()
         {
-            Model = new int[][] { new int[3]{ 1, 1, 1 }, new int[3]{ 1, 1, 1 }, new int[3]{ 1, 1, 1 } };
+            Row = 3;
+            RGB_Range = new int[][] { new int[2] { 200, 250 }, new int[2] { 150, 200 }, new int[2] { 120, 180 } };
             valueChange += valueChangeEvent;
             filter = Filter_TYPE.Mean_Value_Filter;
             valueFilterChange += valueChangeMeanEvent;
@@ -80,28 +103,29 @@ namespace Entity
             int sum = 0;
             foreach (var item in Model)
             {
-                foreach (var it in item)
-                {
-                    sum += it;
-                }
+                    sum += item;
             }
-            int start = Model.Length / 2;
+            int count = Row;
+            int start = count / 2;
 
             for (int i = start; i < x - start; i++) 
             {
                 for (int j = start; j < y - start; j++)
                 {
-                    int sumR = 0, sumG = 0, sumB = 0;
-                    for (int w = 0; w < Model.Length; w++)
+                    if(IsRange(bitmapResult.GetPixel(i, j)))
                     {
-                        for (int h = 0; h < Model.Length; h++)
+                        int sumR = 0, sumG = 0, sumB = 0;
+                        for (int w = 0; w < count; w++)
                         {
-                            sumR += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) * Model[w][h];
-                            sumG += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) * Model[w][h];
-                            sumB += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2) * Model[w][h];
+                            for (int h = 0; h < count; h++)
+                            {
+                                sumR += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) * Model[w,h];
+                                sumG += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) * Model[w,h];
+                                sumB += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2) * Model[w,h];
+                            }
                         }
+                        bitmapResult.SetPixel(i, j, Color.FromArgb(sumR / sum, sumG / sum, sumB / sum));
                     }
-                    bitmapResult.SetPixel(i, j, Color.FromArgb(sumR / sum, sumG / sum, sumB / sum));
                 }
             }
 
@@ -110,59 +134,63 @@ namespace Entity
         private void valueChangeMiddleEvent()
         {
             bitmapResult = BitmapOrigin.Clone() as Bitmap;
-            int start = Model.Length / 2;
+            int count = Model.Length;
+            int start = count / 2;
             for (int i = start; i < x - start; i++)
             {
                 for (int j = start; j < y - start; j++)
                 {
-                    int[,] PixR = new int[Model.Length, Model.Length];
-                    int[,] PixG = new int[Model.Length, Model.Length];
-                    int[,] PixB = new int[Model.Length, Model.Length];
-                    for (int w = 0; w < Model.Length; w++)
+                    if (IsRange(bitmapResult.GetPixel(i, j)))
                     {
-                        for (int h = 0; h < Model.Length; h++)
+                        int[,] PixR = new int[count, count];
+                        int[,] PixG = new int[count, count];
+                        int[,] PixB = new int[count, count];
+                        for (int w = 0; w < count; w++)
                         {
-                            PixR[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) * Model[w][h];
-                            PixG[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) * Model[w][h];
-                            PixB[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2) * Model[w][h];
-                        }
-                    }
-                    int middleR = PixR[0, 0], middleG = PixG[0, 0], middleB = PixB[0, 0];
-                    int x1 = 0, x2 = 0, x3 = 0, x4 = 0, x5 = 0, x6 = 0;
-                    for (int m = 0; m < (Model.Length * Model.Length)/2 + 1; m++)
-                    {
-                        middleR = 255;
-                        middleG = 255;
-                        middleB = 255;
-                        for (int n = 0; n < Model.Length; n++)
-                        {
-                            for (int l = 0; l < Model.Length; l++)
+                            for (int h = 0; h < count; h++)
                             {
-                                if (middleR > PixR[n,l])
-                                {
-                                    middleR = PixR[n,l];
-                                    x1 = n;
-                                    x2 = l;
-                                }
-                                if (middleG > PixG[n, l])
-                                {
-                                    middleG = PixG[n, l];
-                                    x3 = n;
-                                    x4 = l;
-                                }
-                                if (middleB > PixB[n, l])
-                                {
-                                    middleB = PixB[n, l];
-                                    x5 = n;
-                                    x6 = l;
-                                }
+                                PixR[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) * Model[w,h];
+                                PixG[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) * Model[w,h];
+                                PixB[w, h] = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2) * Model[w,h];
                             }
                         }
-                        PixR[x1, x2] = 255;
-                        PixG[x3, x4] = 255;
-                        PixB[x5, x6] = 255;
+                        int middleR = PixR[0, 0], middleG = PixG[0, 0], middleB = PixB[0, 0];
+                        int x1 = 0, x2 = 0, x3 = 0, x4 = 0, x5 = 0, x6 = 0;
+                        for (int m = 0; m < (count * count) / 2 + 1; m++)
+                        {
+                            middleR = 255;
+                            middleG = 255;
+                            middleB = 255;
+                            for (int n = 0; n < count; n++)
+                            {
+                                for (int l = 0; l < count; l++)
+                                {
+                                    if (middleR > PixR[n, l])
+                                    {
+                                        middleR = PixR[n, l];
+                                        x1 = n;
+                                        x2 = l;
+                                    }
+                                    if (middleG > PixG[n, l])
+                                    {
+                                        middleG = PixG[n, l];
+                                        x3 = n;
+                                        x4 = l;
+                                    }
+                                    if (middleB > PixB[n, l])
+                                    {
+                                        middleB = PixB[n, l];
+                                        x5 = n;
+                                        x6 = l;
+                                    }
+                                }
+                            }
+                            PixR[x1, x2] = 255;
+                            PixG[x3, x4] = 255;
+                            PixB[x5, x6] = 255;
+                        }
+                        bitmapResult.SetPixel(i, j, Color.FromArgb(middleR, middleG, middleB));
                     }
-                    bitmapResult.SetPixel(i, j, Color.FromArgb(middleR, middleG, middleB));
                 }
             }
         }
@@ -176,6 +204,18 @@ namespace Entity
                 case 2: return color.B;
             }
             return (color.R + color.G + color.B) / 3;
+        }
+
+        private bool IsRange(Color color)
+        {
+            if (color.R > RGB_Range[0][0]
+                && color.R < RGB_Range[0][1]
+                && color.R > RGB_Range[1][0]
+                && color.R < RGB_Range[1][1]
+                && color.R > RGB_Range[2][0]
+                && color.R < RGB_Range[2][1])
+                return true;
+            return false;
         }
     }
 }

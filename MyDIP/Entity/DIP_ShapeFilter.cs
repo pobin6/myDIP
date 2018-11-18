@@ -16,7 +16,34 @@ namespace Entity
         public enum Filter_TYPE
         {
             Laplace_Filter,
-            Unsharp_Masking_Filter
+            Unsharp_Masking_Filter,
+            Gradient_Filter
+        }
+        public enum Laplace_BD
+        {
+            Real_BD,
+            Fake_BD
+        }
+        Laplace_BD bd;
+        [DescriptionAttribute("Laplace标定模式选择")]
+        public Laplace_BD BD
+        {
+            get { return bd; }
+            set
+            {
+                switch (value)
+                {
+                    case Laplace_BD.Real_BD:
+                        BDFunc = null;
+                        BDFunc += RealBD;
+                        break;
+                    case Laplace_BD.Fake_BD:
+                        BDFunc = null;
+                        BDFunc += FakeBD;
+                        break;
+                }
+                bd = value;
+            }
         }
 
         [DescriptionAttribute("滤波模板")]
@@ -39,11 +66,20 @@ namespace Entity
                         valueFilterChange = null; 
                          valueFilterChange += valueChangeUnsharp_MaskingEvent;
                         break;
+                    case Filter_TYPE.Gradient_Filter:
+                        valueFilterChange = null;
+                        valueFilterChange += valueChangeGradientEvent;
+                        break;
                 }
                 filter = value;
             }
         }
+        [DescriptionAttribute("增强倍率")]
+        public double c { get; set; }
+
         public ValueChange valueFilterChange = null;
+        public delegate int[,,] BDDelegate(int[,,] color);
+        public BDDelegate BDFunc = null;
         private static DIP_ShapeFilter _instance = null;
         private static readonly object _locker = new object();
         private static readonly object _locker2 = new object();
@@ -51,10 +87,12 @@ namespace Entity
 
         DIP_ShapeFilter()
         {
-            Model = new List<int[]> { new int[3]{ 1, 1, 1 }, new int[3]{ 1, -8, 1 }, new int[3]{ 1, 1, 1 } };
+            Model = new List<int[]> { new int[3]{ 0, 1, 0 }, new int[3]{ 1, -4, 1 }, new int[3]{ 0, 1, 0 } };
             valueChange += valueChangeEvent;
             filter = Filter_TYPE.Laplace_Filter;
+            BD = Laplace_BD.Real_BD;
             valueFilterChange += valueChangeLaplaceEvent;
+            c = 1;
         }
         
         public static DIP_ShapeFilter getInstance()
@@ -79,18 +117,18 @@ namespace Entity
             bitmapResult = BitmapOrigin.Clone() as Bitmap;
 
             int[,,] color = new int[3, x, y];
-            int[] max = new int[3] { 0, 0, 0 };
-            int[] min = new int[3] { 256, 256, 256 };
-            int start = Model.Count / 2;
+
+            int count = Model.Count;
+            int start = count / 2;
 
             for (int i = start; i < x - start; i++) 
             {
                 for (int j = start; j < y - start; j++)
                 {
                     int[] sumColor = new int[3] { 0, 0, 0 };
-                    for (int w = 0; w < Model.Count; w++)
+                    for (int w = 0; w < count; w++)
                     {
-                        for (int h = 0; h < Model.Count; h++)
+                        for (int h = 0; h < count; h++)
                         {
                             for (int c = 0; c < 3; c++)
                             {
@@ -98,41 +136,40 @@ namespace Entity
                             }
                         }
                     }
-                    for (int c = 0; c < 3; c++)
-                    {
-                        color[c,i, j] = sumColor[c];
-                        if (color[c, i, j] < min[c]) min[c] = color[c, i, j];
-                        if (color[c, i, j] > max[c]) max[c] = color[c, i, j];
-                    }
-                    //bitmapResult.SetPixel(i, j, Color.FromArgb(r, g, b));
+                    color[0, i, j] = sumColor[0];
+                    color[1, i, j] = sumColor[1];
+                    color[2, i, j] = sumColor[2];
                 }
             }
-            for (int c = 0; c < 3; c++)
+            // 标定
+            color = BDFunc(color);
+            // 叠加原图
+            for (int i = start; i < x - start; i++)
             {
-                int d = max[c] - min[c];
-                if (d < 256 && min[c] > 0) { setBmp(color, 256, 0, start); break; }
-                if (d < 256 && min[c] < 0) { setBmp(color, 256 + min[c],min[c], start); break; }
-                if(d > 256) { setBmp(color, max[c], min[c], start); break; }
+                for (int j = start; j < y - start; j++)
+                {
+                    Color pix = bitmapResult.GetPixel(i, j);
+                    color[0, i, j] = (int)(pix.R - color[0, i, j] * c);
+                    color[1, i, j] = (int)(pix.G - color[1, i, j] * c);
+                    color[2, i, j] = (int)(pix.B - color[2, i, j] * c);
+                }
             }
-            
-
-        }
-        private void setBmp(int[,,] color,int max, int min,int start)
-        {
-            double range = 255 / (double)(max - min);
             for (int i = start; i < x - start; i++)
             {
                 for (int j = start; j < y - start; j++)
                 {
                     for (int c = 0; c < 3; c++)
                     {
-                        color[c, i, j] = (int)((color[c, i, j] - min) * range);
+                        color[c, i, j] = color[c, i, j] > 255 ? 255 : color[c, i, j];
+                        color[c, i, j] = color[c, i, j] < 0 ? 0 : color[c, i, j];
                     }
-                    Color pix = bitmapResult.GetPixel(i, j);
-                    int r = Range(pix.R - color[0, i, j]);
-                    int g = Range(pix.G - color[1, i, j]);
-                    int b = Range(pix.B - color[2, i, j]);
-                    bitmapResult.SetPixel(i, j, Color.FromArgb(r, g, b));
+                }
+            }
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    bitmapResult.SetPixel(i, j, Color.FromArgb(color[0, i, j], color[1, i, j], color[2, i, j]));
                 }
             }
         }
@@ -147,16 +184,17 @@ namespace Entity
                     sum += it;
                 }
             }
-            int start = Model.Count / 2;
+            int count = Model.Count;
+            int start = count / 2;
 
             for (int i = start; i < x - start; i++)
             {
                 for (int j = start; j < y - start; j++)
                 {
                     int sumR = 0, sumG = 0, sumB = 0;
-                    for (int w = 0; w < Model.Count; w++)
+                    for (int w = 0; w < count; w++)
                     {
-                        for (int h = 0; h < Model.Count; h++)
+                        for (int h = 0; h < count; h++)
                         {
                             sumR += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) * Model[w][h];
                             sumG += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) * Model[w][h];
@@ -183,6 +221,86 @@ namespace Entity
             }
         }
 
+        private void valueChangeGradientEvent()
+        {
+            bitmapResult = BitmapOrigin.Clone() as Bitmap;
+
+            int[,,] color = new int[3, x, y];
+            int[] max = new int[3] { 0, 0, 0 };
+            int[] min = new int[3] { 256, 256, 256 };
+            int[,,] M = new int[2, 3, 3] 
+            { 
+                { 
+                    { -1, -2, -1 }, 
+                    { 0, 0, 0 }, 
+                    { 1, 2, 1 } } , 
+                { 
+                    { -1, 0, 1 }, 
+                    { -2, 0, 2 }, 
+                    { -1, 0, 1 }
+                }
+            };
+            int start = 1;
+            int count = 3;
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    int[,] sumColor = new int[2, 3] { { 0, 0, 0 },{ 0, 0, 0 } };
+                    for (int s = 0; s < 2; s++)
+                    {
+
+                        for (int w = 0; w < count; w++)
+                        {
+                            for (int h = 0; h < count; h++)
+                            {
+                                for (int c = 0; c < 3; c++)
+                                {
+                                    sumColor[s,c] += Gray(bitmapResult.GetPixel(i + w - start, j + h - start), c) * M[s,w,h];
+                                }
+                            }
+                        }
+                        sumColor[s, 0] = Math.Abs(sumColor[s,0]);
+                        sumColor[s, 1] = Math.Abs(sumColor[s,1]);
+                        sumColor[s, 2] = Math.Abs(sumColor[s,2]);
+                    }
+                    color[0, i, j] = (sumColor[0, 0] + sumColor[1, 0]);
+                    color[1, i, j] = (sumColor[0, 1] + sumColor[1, 1]);
+                    color[2, i, j] = (sumColor[0, 2] + sumColor[1, 2]);
+                }
+            }
+            color = BDFunc(color);
+            //叠加原图
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    Color pix = bitmapResult.GetPixel(i, j);
+                    color[0, i, j] = (int)(pix.R - color[0, i, j] * c);
+                    color[1, i, j] = (int)(pix.G - color[1, i, j] * c);
+                    color[2, i, j] = (int)(pix.B - color[2, i, j] * c);
+                }
+            }
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    for (int c = 0; c < 3; c++)
+                    {
+                        color[c, i, j] = color[c, i, j] > 255 ? 255 : color[c, i, j];
+                        color[c, i, j] = color[c, i, j] < 0 ? 0 : color[c, i, j];
+                    }
+                }
+            }
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    bitmapResult.SetPixel(i, j, Color.FromArgb(color[0, i, j], color[1, i, j], color[2, i, j]));
+                }
+            }
+        }
+
         private int Gray(Color color,int i)
         {
             switch(i)
@@ -202,5 +320,52 @@ namespace Entity
                 return 0;
             return color;
         }
+        private int[,,] RealBD(int[,,] color)
+        {
+            int start = 1;
+            int[] max = new int[3] { 0, 0, 0 };
+            int[] min = new int[3] { 256, 256, 256 };
+            for (int c = 0; c < 3; c++)
+            {
+                for (int i = start; i < x - start; i++)
+                {
+                    for (int j = start; j < y - start; j++)
+                    {
+                        if (color[c, i, j] < min[c]) min[c] = color[c, i, j];
+                        if (color[c, i, j] > max[c]) max[c] = color[c, i, j];
+                    }
+                }
+            }
+            for (int c = 0; c < 3; c++)
+            {
+                double range = 255 / (double)(max[c] - min[c]);
+                for (int i = start; i < x - start; i++)
+                {
+                    for (int j = start; j < y - start; j++)
+                    {
+
+                        color[c, i, j] = (int)((color[c, i, j] - min[c]) * range);
+                    }
+                }
+            }
+            return color;
+        }
+        private int[,,] FakeBD(int[,,] color)
+        {
+            int start = 1;
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    for (int c = 0; c < 3; c++)
+                    {
+                        color[c, i, j] = color[c, i, j] > 255 ? 255 : color[c, i, j];
+                        color[c, i, j] = color[c, i, j] < 0 ? 0 : color[c, i, j];
+                    }
+                }
+            }
+            return color;
+        }
+        
     }
 }
