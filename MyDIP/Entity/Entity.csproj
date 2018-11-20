@@ -58,6 +58,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <Compile Include="DIP_FFT.cs" />
     <Compile Include="DIP_Gray.cs" />
     <Compile Include="DIP_HE.cs" />
     <Compile Include="DIP_ShapeFilter.cs" />

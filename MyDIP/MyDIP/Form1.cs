@@ -27,6 +27,7 @@ namespace MyDIP
             DIP_SoftFilter.getInstance().valueChange += ValueChange;
             DIP_ShapeFilter.getInstance().valueChange += ValueChange;
             DIP_Math.getInstance().valueChange += ValueChange;
+            DIP_FFT.getInstance().valueChange += ValueChange;
         }
 
         private void btnGray_Click(object sender, EventArgs e)
@@ -72,6 +73,13 @@ namespace MyDIP
         {
             entity = DIP_Math.getInstance();
             FormSet formSet = new FormSet(DIP_Math.getInstance());
+            formSet.Show();
+        }
+
+        private void btnFFT_Click(object sender, EventArgs e)
+        {
+            entity = DIP_FFT.getInstance();
+            FormSet formSet = new FormSet(DIP_FFT.getInstance());
             formSet.Show();
         }
     }
