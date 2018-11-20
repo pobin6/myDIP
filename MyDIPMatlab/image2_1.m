@@ -6,7 +6,7 @@ clc;
 %3、傅里叶变换后与滤波器乘积
 %4、用(-1)^(x+y)与傅里叶反变换后的滤波后的实部乘积
 %5、裁剪图像
-imageOrigin = imread('..\test\test3.jpg');
+imageOrigin = imread('..\test\test5.jpg');
 imageGray = rgb2gray(imageOrigin);
 [w,h] = size(imageGray);
 P = 2*w;
@@ -23,7 +23,8 @@ imagePQ(2:2:P,1:2:Q) = imagePQ(2:2:P,1:2:Q) * -1;
 imageDouble = im2double(imagePQ);
 F = fft2(imageDouble);      % 傅里叶变换
 % 4 应用滤波器 并 计算
-G = Bandpass_Filter(F,50,50);
+G = Bandpass_Filter(F,300,100);
+%G = High_Pass_Filter(G,10);
 T = G;
 figure;
 T=log(T+1);                 % 进行对数变换 低通模糊 高通锐化
@@ -37,4 +38,9 @@ imageRes(2:2:P,1:2:Q) = imageRes(2:2:P,1:2:Q) * -1;
 %F = abs(F);                 % 傅里叶变换后是复数，计算复数的模
 %T=log(F+1);                 % 进行对数变换 低通模糊 高通锐化
 figure();
-imshow(imageRes,[])
+image = imageRes(1:P/2,1:Q/2);
+imgMin = min(min(image));
+imgMax = max(max(image));
+image = uint8((image - imgMin) / (imgMax-imgMin) * 255);
+imshow(image)
+%imwrite(image,'..\test\test5Res.bmp');

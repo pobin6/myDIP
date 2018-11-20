@@ -14,8 +14,8 @@ v = v(1:P,1:Q);
 u = (1:Max)' * ones(1,Max);
 u = u(1:P,1:Q);
 % º∆À„œ›≤®
-Pix_max = max(max(real(F(1:P/2,1:Q/2))));
-[uk1,vk1] = find((real(F(1:P/2,1:Q/2))== Pix_max));
+Pix_max = max(max(real(F(1:P/2,1:Q/2 - 20))));
+[uk1,vk1] = find((real(F(1:P/2,1:Q/2 - 20))== Pix_max));
 uk = [P/2-uk1;uk1-P/2];
 vk = [Q/2-vk1;Q/2-vk1];
 H = ones(P,Q);

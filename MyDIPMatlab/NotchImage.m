@@ -6,7 +6,7 @@ clc;
 %3、傅里叶变换后与滤波器乘积
 %4、用(-1)^(x+y)与傅里叶反变换后的滤波后的实部乘积
 %5、裁剪图像
-imageOrigin = imread('..\test\test3.jpg');
+imageOrigin = imread('..\test\test5.jpg');
 imageGray = rgb2gray(imageOrigin);
 [w,h] = size(imageGray);
 P = 2*w;
@@ -27,7 +27,7 @@ T=log(F+1);                 % 进行对数变换 低通模糊 高通锐化
 T = real(T);                 % 傅里叶变换后是复数，计算复数的模
 imshow(T,[]);
 % 4 应用滤波器 并 计算
-[G, uk, vk] = Notch_Filter(F,30,2);
+[G, uk, vk] = Notch_Filter(F,11,1);
 T = G;
 %T(uk-30:uk+30,vk-30:vk+30) = 0;
 figure;
@@ -47,4 +47,4 @@ imgMin = min(min(image));
 imgMax = max(max(image));
 image = uint8((image - imgMin) / (imgMax-imgMin) * 255);
 imshow(image);
-imwrite(image,'..\test\test3Res.bmp');
+%imwrite(image,'..\test\test4Res.bmp');
