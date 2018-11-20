@@ -19,6 +19,4 @@ D = ((u-P/2).^2 + (v-Q/2).^2).^0.5;
 H = zeros(P,Q);
 H((D > d - w/2 & D < d + w/2)) = 1;
 G = H .* F;
-figure;
-imshow(G,[]);
 end
