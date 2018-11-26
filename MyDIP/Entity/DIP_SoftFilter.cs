@@ -16,7 +16,9 @@ namespace Entity
         public enum Filter_TYPE
         {
             Mean_Value_Filter,
-            Middle_Value_Filter
+            Middle_Value_Filter,
+            Bilateral_Filter,
+            Gaussian_Filter
         }
 
         //[DescriptionAttribute("滤波模板")]
@@ -43,6 +45,8 @@ namespace Entity
         }
         [DescriptionAttribute("平滑计算的RGB范围")]
         public int[][] RGB_Range { get; set; }
+        public double sigma_d { get; set; }
+        public double sigma_r { get; set; }
         public Filter_TYPE filter;
         [DescriptionAttribute("滤波器选择")]
         public Filter_TYPE Filter
@@ -60,10 +64,21 @@ namespace Entity
                         valueFilterChange = null; 
                          valueFilterChange += valueChangeMiddleEvent;
                         break;
+                    case Filter_TYPE.Gaussian_Filter:
+                        valueFilterChange = null;
+                        valueFilterChange += valueChangeGaussianEvent;
+                        break;
+                    case Filter_TYPE.Bilateral_Filter:
+                        valueFilterChange = null;
+                        valueFilterChange += valueChangeBilateralEvent;
+                        break;
                 }
                 filter = value;
             }
         }
+
+
+
         public ValueChange valueFilterChange = null;
         private static DIP_SoftFilter _instance = null;
         private static readonly object _locker = new object();
@@ -73,6 +88,8 @@ namespace Entity
         DIP_SoftFilter()
         {
             Row = 3;
+            sigma_d = 2;
+            sigma_r = 0.1;
             RGB_Range = new int[][] { new int[2] { 200, 250 }, new int[2] { 150, 200 }, new int[2] { 120, 180 } };
             valueChange += valueChangeEvent;
             filter = Filter_TYPE.Mean_Value_Filter;
@@ -193,7 +210,79 @@ namespace Entity
                 }
             }
         }
+        private void valueChangeGaussianEvent()
+        {
+            bitmapResult = BitmapOrigin.Clone() as Bitmap;
+            double sum = 0;
+            int count = Row;
+            int start = count / 2;
 
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    if (IsRange(bitmapResult.GetPixel(i, j)))
+                    {
+                        double sumR = 0, sumG = 0, sumB = 0;
+                        sum = 0;
+                        for (int w = 0; w < count; w++)
+                        {
+                            for (int h = 0; h < count; h++)
+                            {
+                                double c = 0, p = Math.Pow(w - start, 2), q = Math.Pow(h - start, 2), w1;
+                                w1 = Math.Pow(Math.E, -(p + q) / (2 * sigma_d * sigma_d));
+                                c = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0);
+                                sumR += c * w1;
+                                c = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1);
+                                sumG += c * w1;
+                                c = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2);
+                                sumB += c * w1;
+                                sum += w1;
+                            }
+                        }
+                        bitmapResult.SetPixel(i, j, Color.FromArgb((int)(sumR / sum), (int)(sumG / sum), (int)(sumB / sum)));
+                    }
+                }
+            }
+        }
+        public void valueChangeBilateralEvent()
+        {
+            bitmapResult = BitmapOrigin.Clone() as Bitmap;
+            double sum = 0;
+            int count = Row;
+            int start = count / 2;
+
+            for (int i = start; i < x - start; i++)
+            {
+                for (int j = start; j < y - start; j++)
+                {
+                    if (IsRange(bitmapResult.GetPixel(i, j)))
+                    {
+                        double sumR = 0, sumG = 0, sumB = 0;
+                        double r = Gray(bitmapResult.GetPixel(i, j), 0) / 255.0;
+                        double g = Gray(bitmapResult.GetPixel(i, j), 1) / 255.0;
+                        double b = Gray(bitmapResult.GetPixel(i, j), 2) / 255.0;
+                        for (int w = 0; w < count; w++)
+                        {
+                            for (int h = 0; h < count; h++)
+                            {
+                                double c, p = Math.Pow(w - start, 2), q = Math.Pow(h - start, 2), w1;
+                                c = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 0) / 255.0;
+                                w1 = Math.Pow(Math.E, -(p + q) / (2 * sigma_d * sigma_d)) * Math.Pow(Math.E, -(Math.Pow(r - c, 2)) / (2 * sigma_r * sigma_r));
+                                sumR += c * w1;
+                                c = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 1) / 255.0;
+                                sumG += c * w1;
+                                c = Gray(bitmapResult.GetPixel(i + w - start, j + h - start), 2) / 255.0;
+                                sumB += c * w1;
+                                sum += w1;
+                            }
+                        }
+                        bitmapResult.SetPixel(i, j, Color.FromArgb((int)(sumR * 255 / sum), (int)(sumG * 255 / sum), (int)(sumB * 255 / sum)));
+                        sum = 0;
+                    }
+                }
+            }
+        }
         private int Gray(Color color,int i)
         {
             switch(i)

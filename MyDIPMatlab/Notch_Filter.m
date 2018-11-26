@@ -1,5 +1,5 @@
 function [G,uk,vk] = Notch_Filter(F,D0,n)
-%Low_Pass_Filter 低通滤波器
+%Low_Pass_Filter 陷波滤波器
 %参数 F 傅里叶变换后的矩阵
 %参数 d 截止频率
 % 坐标
